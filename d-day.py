@@ -2,23 +2,31 @@ import sys
 from datetime import date
 from time import sleep
 
+import database
+
 
 def main():
     print("D-Day Calculator")
+    database.init_db()
     events_list = []
-    menu = display_menu()
-    if menu == 1:
-        view_events(events_list)
-    elif menu == 2:
-        new_event = add_event()
-        events_list.append(new_event)
-    elif menu == 3:
-        del_event = delete_event(events_list)
-        events_list.remove(del_event)
-    elif menu == 4:
-        print("Bye!")
-        sleep(0.5)
-        sys.exit()
+    while True:
+        menu = display_menu()
+        if not events_list and (menu == 1 or menu == 2):
+            print("No upcoming events!")
+            continue
+
+        if menu == 1:
+            view_events(events_list)
+        elif menu == 2:
+            new_event = add_event()
+            events_list.append(new_event)
+        elif menu == 3:
+            del_event = delete_event(events_list)
+            events_list.remove(del_event)
+        elif menu == 4:
+            print("Bye!")
+            sleep(0.5)
+            sys.exit()
 
 
 def display_menu() -> int:
