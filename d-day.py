@@ -5,30 +5,6 @@ from time import sleep
 import database
 
 
-def main():
-    print("D-Day Calculator")
-    database.init_db()
-    events_list = []
-    while True:
-        menu = display_menu()
-        if not events_list and (menu == 1 or menu == 2):
-            print("No upcoming events!")
-            continue
-
-        if menu == 1:
-            view_events(events_list)
-        elif menu == 2:
-            new_event = add_event()
-            events_list.append(new_event)
-        elif menu == 3:
-            del_event = delete_event(events_list)
-            events_list.remove(del_event)
-        elif menu == 4:
-            print("Bye!")
-            sleep(0.5)
-            sys.exit()
-
-
 def display_menu() -> int:
     print("""
     -- Main Menu --
@@ -51,29 +27,24 @@ def display_menu() -> int:
             continue
 
 
-def view_events(events):
+def view_events():
+    events = database.get_events()
     index = 1  # change this index to auto-generated event key in sqlite - but can keys be modified??
     for event in events:
-        print(f"{index}\t{event['name']}\t{event['date']}\t{event['group']}")
+        print(f"{index}\t{event[0]}\t{event[1]}\t{event[2]}")
         index += 1
 
 
-def add_event() -> dict:
+def add_event():
     name = input("Event name: ")
     event_date = get_date()
     group = input("Event type: ").title()
-
-    event = {
-        "name": name,
-        "date": event_date,
-        "group": group,
-    }
-    return event
+    database.add_event(name, event_date, group)
 
 
 def get_date() -> date:
     while True:
-        date_raw = input("Date: (YYYY-MM-DD)")
+        date_raw = input("Date(YYYY-MM-DD): ")
         try:
             return date.fromisoformat(date_raw)
         except ValueError as e:
@@ -81,7 +52,7 @@ def get_date() -> date:
 
 
 def delete_event(events):
-    view_events(events)
+    view_events()
     while True:
         select = int(input("Event to delete (number): "))
         if select > len(events):
@@ -89,6 +60,29 @@ def delete_event(events):
         else:
             break
     return events[select]
+
+
+def main():
+    print("D-Day Calculator")
+    database.init_db()
+    events_list = []
+    while True:
+        menu = display_menu()
+        if not events_list and (menu == 1):
+            print("No upcoming events!")
+            continue
+
+        if menu == 1:
+            view_events()
+        elif menu == 2:
+            add_event()
+        elif menu == 3:
+            del_event = delete_event(events_list)
+            events_list.remove(del_event)
+        elif menu == 4:
+            print("Bye!")
+            sleep(0.5)
+            sys.exit()
 
 
 if __name__ == "__main__":
