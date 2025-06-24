@@ -5,34 +5,48 @@ from time import sleep
 import database
 
 
-def display_menu() -> int:
-    print("""
-    -- Main Menu --
-    1. View all events
-    2. Add new events
-    3. Delete event
-    4. Exit""")
+def main():
+    print("D-Day Calculator")
+    database.init_db()
     while True:
+        events_count = view_events()
+        print(
+            """
+        -- Actions --
+        1. Add new event
+        2. Edit events
+        3. Delete event
+        4. Exit"""
+        )
         select = input("Select a menu to navigate to: ")
         if select == "1":
-            return 1
+            add_event()
         elif select == "2":
-            return 2
+            edit_event(events_count)
         elif select == "3":
-            return 3
+            delete_event()
         elif select == "4":
-            return 4
+            print("Bye!")
+            sleep(0.5)
+            sys.exit()
         else:
-            print("Please select a menu between 1 to 4")
-            continue
+            print("Please choose a valid menu between 1 and 4")
 
 
 def view_events():
     events = database.get_events()
+    if not events:
+        print("No upcoming events")
+        events_count = 0
+    else:
+        events_count = len(events)
+
     index = 1  # change this index to auto-generated event key in sqlite - but can keys be modified??
     for event in events:
         print(f"{index}\t{event[0]}\t{event[1]}\t{event[2]}")
         index += 1
+
+    return events_count
 
 
 def add_event():
@@ -51,38 +65,30 @@ def get_date() -> date:
             print(f"{e}: Date format should be (YYYY-MM-DD)")
 
 
-def delete_event(events):
-    view_events()
+def edit_event(events_count):
+    print(events_count)
     while True:
-        select = int(input("Event to delete (number): "))
-        if select > len(events):
-            print("Not a valid number key! Try again")
+        id = input("Which event would you like to edit(event number): ")
+        if not id.isdigit():
+            print("Type in a number")
+            continue
+        if int(id) > events_count:
+            print("Selection out of range. Try again")
         else:
             break
-    return events[select]
+    new_name = input("Enter new name (Leave empty to skip): ").strip()
+    new_date = input("Enter new date (Leave empty to skip): ").strip()
+    new_group = input("Enter new group tag (Leave empty to skip): ").strip()
+    # skip calling database if all fields are empty
+    if not new_name and not new_date and not new_group:
+        return
+    database.edit_event(id, new_name, new_date, new_group)
 
 
-def main():
-    print("D-Day Calculator")
-    database.init_db()
-    events_list = []
-    while True:
-        menu = display_menu()
-        if not events_list and (menu == 1):
-            print("No upcoming events!")
-            continue
+def delete_event():
+    id = input("Which event would you like to delete(event number, or 0 for all): ")
 
-        if menu == 1:
-            view_events()
-        elif menu == 2:
-            add_event()
-        elif menu == 3:
-            del_event = delete_event(events_list)
-            events_list.remove(del_event)
-        elif menu == 4:
-            print("Bye!")
-            sleep(0.5)
-            sys.exit()
+    database.delete_event(id)
 
 
 if __name__ == "__main__":
