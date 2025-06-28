@@ -1,22 +1,21 @@
 import sys
-from datetime import date
+from datetime import date, timedelta
 from time import sleep
 
 import database
 
 
 def main():
-    print("D-Day Calculator")
     database.init_db()
     while True:
         events_count = view_events()
         print(
             """
-        -- Actions --
-        1. Add new event
-        2. Edit events
-        3. Delete event
-        4. Exit"""
+-- Actions --
+1. Add new event
+2. Edit events
+3. Delete event
+4. Exit"""
         )
         select = input("Select a menu to navigate to: ")
         if select == "1":
@@ -41,12 +40,27 @@ def view_events():
     else:
         events_count = len(events)
 
+    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 8, "+", "-" * 9, "+")
+    print(f"| No | {'Event'.ljust(19)} | {'D-day'.ljust(9)}| {'Group'.ljust(10)}|")
+    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 8, "+", "-" * 9, "+")
     index = 1  # change this index to auto-generated event key in sqlite - but can keys be modified??
     for event in events:
-        print(f"{index}\t{event[0]}\t{event[1]}\t{event[2]}")
+        col1 = str(index).zfill(2).ljust(3)
+        col2 = event[0].ljust(20)
+        col3 = str(calculate(event[1])).ljust(4)
+        days = "days".ljust(5)
+        col4 = event[2].ljust(10)
+        print(f"| {col1}| {col2}| {col3}{days}| {col4}|")
         index += 1
+    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 8, "+", "-" * 9, "+")
 
     return events_count
+
+
+def calculate(event):
+    today = date.today()
+    days_to: timedelta = today - event
+    return abs(days_to.days)
 
 
 def add_event():
@@ -66,7 +80,6 @@ def get_date() -> date:
 
 
 def edit_event(events_count):
-    print(events_count)
     while True:
         id = input("Which event would you like to edit(event number): ")
         if not id.isdigit():
