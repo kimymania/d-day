@@ -104,12 +104,3 @@ def delete_event(id):
             except sqlite3.Error as e:
                 print(f"Error deleting data from db: {e}")
                 cx.rollback()
-
-
-def close():
-    with sqlite3.connect(
-        "events.db", detect_types=sqlite3.PARSE_DECLTYPES, autocommit=False
-    ) as cx:
-        cu = cx.cursor()
-        cu.close()
-        cx.close()
