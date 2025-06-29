@@ -40,27 +40,28 @@ def view_events():
     else:
         events_count = len(events)
 
-    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 8, "+", "-" * 9, "+")
+    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 9, "+", "-" * 9, "+")
     print(f"| No | {'Event'.ljust(19)} | {'D-day'.ljust(9)}| {'Group'.ljust(10)}|")
-    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 8, "+", "-" * 9, "+")
-    index = 1  # change this index to auto-generated event key in sqlite - but can keys be modified??
+    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 9, "+", "-" * 9, "+")
     for event in events:
-        col1 = str(index).zfill(2).ljust(3)
-        col2 = event[0].ljust(20)
-        col3 = str(calculate(event[1])).ljust(4)
+        col1 = str(event[0]).zfill(2).ljust(3)
+        col2 = event[1].ljust(20)
+        col3 = calculate(event[2]).ljust(5)
         days = "days".ljust(5)
-        col4 = event[2].ljust(10)
+        col4 = event[3].ljust(10)
         print(f"| {col1}| {col2}| {col3}{days}| {col4}|")
-        index += 1
-    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 8, "+", "-" * 9, "+")
+    print("+", "-" * 2, "+", "-" * 19, "+", "-" * 9, "+", "-" * 9, "+")
 
     return events_count
 
 
-def calculate(event):
+def calculate(event: date) -> str:
     today = date.today()
     days_to: timedelta = today - event
-    return abs(days_to.days)
+    if days_to.days > 0:
+        return f"+{days_to.days}"
+    else:
+        return f"{abs(days_to.days)}"
 
 
 def add_event():
@@ -99,7 +100,9 @@ def edit_event(events_count):
 
 
 def delete_event():
-    id = input("Which event would you like to delete(event number, or 0 for all): ")
+    id = int(
+        input("Which event would you like to delete(event number, or 0 for all): ")
+    )
 
     database.delete_event(id)
 
